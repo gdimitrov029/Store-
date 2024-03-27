@@ -1,0 +1,222 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+using namespace std;
+
+class Furniture {
+protected:
+    string material;
+    int price;
+    string type;
+public:
+    
+    Furniture() {};
+    ~Furniture() {
+    };
+    void set_material(string m) { material = m; };
+    void set_price(int p) { price = p; };
+    void set_type(string typ) { type = typ; };
+    string get_material() { return material; };
+    int get_price() { return price; };
+    string get_type() { return type; };
+
+};
+class Table : public Furniture {
+private:
+    
+    bool hand_made;
+    string type; 
+
+public:
+    Table(){
+        set_material("wood");//We only sell wooden tables
+    }
+    ~Table(){}
+    string get_handmade() {
+        if (hand_made == true) {
+            return "Yes";
+        }
+        else
+            return "No";
+    }
+    void set_handmade(bool handmade) { hand_made = handmade; };
+    void add_table() {
+
+        string type;
+        int price;
+        char handmade;
+
+        cout << "Enter shape of table: ";
+        cin >> type;
+        cout << "Enter price of table: ";
+        cin >> price;
+        cout << "Is the table hand made? Y/N ";
+        cin >> handmade;
+        if (handmade == 'Y')
+            hand_made = true;
+        else
+            hand_made = false;        
+        set_type(type);
+        set_price(price);
+    }
+};
+
+
+class Sofa : public Furniture {
+private:
+    string additional_info[10];
+    int add_info_lines;
+    int sizes_counter;
+
+public:
+    
+    Sofa() {
+        set_material("leather");
+    }
+    ~Sofa() {
+    }
+    int get_sizes_counter() { return sizes_counter; };
+    void set_sizes_counter(int i) { sizes_counter = i; };
+    int get_add_info() { return add_info_lines; };
+    void set_add_info(int n) { add_info_lines = n; };
+    void add_sofa() {
+
+        string type;
+        int price;
+        cout << "Enter type of sofa: ";
+        cin >> type;
+        cout << "Enter price of sofa: ";
+        cin >> price;
+
+        set_type(type);
+        set_price(price);
+    }
+
+    void set_sofa(){
+        
+        for (int i = 0; i < add_info_lines; i++) {
+            cout << "Enter next size: ";
+            cin >> additional_info[i];
+        }
+    }
+    
+virtual void print_sofa_information() {
+        for (int i = 0; i < add_info_lines; i++) {
+            cout << additional_info[i] << "\n";
+        }
+    }
+};
+
+vector<Sofa> all_sofas;
+vector<Table> all_tables;
+
+static void print_all_info() {
+    cout << "Printing information about tables: \n";
+    for (int i = 0; i < all_tables.size(); i++) {
+        cout << "Type of table: " << all_tables[i].get_type() << "\n";
+        cout << "Material of table: " << all_tables[i].get_material() << "\n";
+        cout << "Price of table: " << all_tables[i].get_price() << "\n";
+    }
+    cout << "Done printing tables. Now printing sofas: \n";
+    for (int i = 0; i < all_sofas.size(); i++) {
+        cout << "Type of sofa: " << all_sofas[i].get_type() << "\n";
+        cout << "Material of sofa: " << all_sofas[i].get_material() << "\n";
+        cout << "Price of sofa: " << all_sofas[i].get_price() << "\n";
+        cout << "Printing additional sizes: " << "\n";
+        all_sofas[i].print_sofa_information();
+    }
+}
+static void add_sofa() {
+    int counter;
+    int add_info;
+    cout << "How many sofas would you like to add? ";
+    cin >> counter;
+    for (int i = 0; i < counter; i++) {
+        Sofa sofa_obj;
+        sofa_obj.add_sofa();
+        cout << "Adding additional sizes for this sofa. How many sizes would you like to add? ";
+        cin >> add_info;
+        sofa_obj.set_sizes_counter(add_info);
+        sofa_obj.set_add_info(add_info);
+        sofa_obj.set_sofa();
+        all_sofas.push_back(sofa_obj);
+    }
+}
+
+static void write_file() {
+    string filepath;
+    cout << "Enter full filepath: \n";
+    cin >> filepath;
+    ofstream file(filepath);
+    if (file.is_open()) {
+        for (int i = 0; i < all_tables.size(); i++) {
+            file << "Type of table: " << all_tables[i].get_type() << "\n";
+            file << "Material of table: " << all_tables[i].get_material() << "\n";
+            file << "Price of table: " << all_tables[i].get_price() << "\n";
+            file << "Is table hand made " << all_tables[i].get_handmade() << "\n";
+            file << "------------------------------------ \n";
+        }
+        for (int i = 0; i < all_sofas.size(); i++) {
+            file << "Type of sofa: " << all_sofas[i].get_type() << "\n";
+            file << "Material of sofa: " << all_sofas[i].get_material() << "\n";
+            file << "Price of sofa: " << all_sofas[i].get_price() << "\n";
+        }
+    }
+    else {
+        cout << "File not found. \n";
+    }
+    cout << "Changes to file done." << "\n";
+}
+
+static void add_table() {
+    int counter;
+    cout << "How many tables would you like to add? ";
+    cin >> counter;
+    for (int i = 0; i < counter; i++) {
+        Table table_obj;
+        table_obj.add_table();
+        all_tables.push_back(table_obj);
+        //Cool thing is that with the deconstructor we don't have to free the memory of the table object here, the deconstructor does it for us
+    }
+}
+void do_work_seller() {
+    cout << "You are now a seller. You can add furniture to the inventory. Press 0 exit the program.\n";
+    cout << "List of available options: \n";
+    cout << "1   Add table \n" << "2   Add sofa\n";
+    cout << "3   Print all inventory \n" << "4   Write to file \n";
+    int user_input;
+    while (true) {
+        cin >> user_input;
+        switch (user_input) {
+        case 0:
+            exit(0);
+            break;
+        case 1:
+            add_table();
+            break;
+        case 2:
+            add_sofa();
+            break;
+        case 3:
+            print_all_info();
+            break;
+        case 4:
+            write_file();
+            break;
+        default:
+            throw "Invalid input \n";
+        }
+    }
+}
+int main()
+{  
+    cout << "Welcome to our sofas and chairs store. \n";  
+    try {
+        do_work_seller();
+    }
+    catch (const char* msg) {
+        cerr << msg;
+    }
+    return 0;
+
+}
